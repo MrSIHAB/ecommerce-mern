@@ -1,5 +1,4 @@
 const nodemailer = require('nodemailer');
-const { smtpUsername, smtpPassword } = require('../secret');
 
 /** Transporter will be used to authorize email server */
 const transporter = nodemailer.createTransport({
@@ -7,8 +6,8 @@ const transporter = nodemailer.createTransport({
     port: 587,
     secure: false,
     auth: {
-        user: smtpUsername,
-        pass: smtpPassword
+        user: process.env.SMTP_USERNAME || "",
+        pass: process.env.SMTP_PASSWORD || ""
     }
 })
 

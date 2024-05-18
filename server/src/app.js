@@ -12,6 +12,7 @@ const { rateLimiter } = require("./middlewares/rateLimiter");
 
 //  ======================    Configure Module   ======================
 const app = express();
+require('dotenv').config()
 
 
 //  ====================    Register Npm Middlewares   ======================

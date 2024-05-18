@@ -3,9 +3,13 @@ const User = require("../models/user");
 const { default: mongoose } = require("mongoose");
 const { successResponse } = require("../err/resopnse");
 const { createJsonWebToken } = require("../helper/jsonWebToken");
-const { jwtActivationKey, clientURL } = require("../secret");
 const { emailWithNodemailer } = require("../helper/email");
 const jwt = require("jsonwebtoken");
+
+// Environment variables
+const JWT_ACTIVATION_KEY = process.env.JWT_ACTIVATION_KEY || "key not found";
+const CLIENT_URL = process.env.CLIENT_URL || "http://127.0.0.1:3005";
+
 
 
 
@@ -25,7 +29,7 @@ const handlePostRegister = async (req, res, next) => {
     // -------------------------------------- Create JWT token
     const varifyToken = createJsonWebToken(
     { name, email, password, phone, address },
-    jwtActivationKey,
+    JWT_ACTIVATION_KEY,
     "5m"
     )
     // ------------------------------------ Preparing Email
@@ -36,16 +40,18 @@ const handlePostRegister = async (req, res, next) => {
         <h2>Hello ${name} !</h2>
         <p>Please click the link bellow to confirm your E-mail and activate your account.</p>
         <a 
-          href="${clientURL}/api/activate/${varifyToken}" 
+          href="${CLIENT_URL}/api/activate/${varifyToken}" 
           target="_blank"
         >
           <button
           style="
             height: 50px;
             width: 300px;
-            border-redius: 30px;
-            background: #00ffff;
-            color: #eef
+            border-radius: 30px;
+            background: #0099ff;
+            color: #001;
+            border: 0;
+            outline: 0;
           "
           >
             Activate account
@@ -55,7 +61,7 @@ const handlePostRegister = async (req, res, next) => {
       `
     }
     try {
-      await emailWithNodemailer(emailData); // ---------- Sending Email
+      // await emailWithNodemailer(emailData); // ---------- Sending Email
     } catch (error) {
       return next(createError(500, "Failed to send varification email."));
     }
@@ -86,7 +92,7 @@ const handleUserActivation= async (req, res, next)=>{
 
     try {
       /** Decoding the access token with the enCoding activation key */
-      const deCodedAccount = jwt.verify(token, jwtActivationKey);
+      const deCodedAccount = jwt.verify(token, JWT_ACTIVATION_KEY);
       if(!deCodedAccount) throw createError(401, "User not able to varify.")
       if(await User.exists({email: deCodedAccount.email}))
         throw createError(409,"User Already Exist. SignIN please.");

@@ -1,10 +1,10 @@
 const mongoose = require("mongoose");
-const { MongoURI } = require("../secret");
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/27017"
 
 const connectDB = async () => {
   try {
     await mongoose
-      .connect(MongoURI)
+      .connect(MONGODB_URI)
       .then(() => console.log("Databased Connected..."));
 
     mongoose.connection.on("error", (error) =>

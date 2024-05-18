@@ -1,7 +1,7 @@
-const { exec } = require('child_process')
+// const { exec } = require('child_process')
 const app = require("./app");
 const { connectDB } = require("./config/db");
-const { PORT } = require("./secret");
+const PORT = process.env.PORT;
 
 // connect(MongoURI, ()=> console.log("Database Connected successfully..."))
 
