@@ -28,16 +28,30 @@ const handlePostRegister = async (req, res, next) => {
     jwtActivationKey,
     "5m"
     )
-
-    // ------------------------------------ Preparing Email ------------
+    // ------------------------------------ Preparing Email
     const emailData = {
       email,
       subject: "account activation mail.",
       html: `
         <h2>Hello ${name} !</h2>
-        <p> Please Click here to activate your account. </p>
-        <a href="${clientURL}/api/activate/${varifyToken}" target="_blank"> Activate your account </a>
-        
+        <p>Please click the link bellow to confirm your E-mail and activate your account.</p>
+        <a 
+          href="${clientURL}/api/activate/${varifyToken}" 
+          target="_blank"
+        >
+          <button
+          style="
+            height: 50px;
+            width: 300px;
+            border-redius: 30px;
+            background: #00ffff;
+            color: #eef
+          "
+          >
+            Activate account
+          </button>
+        </a>
+        <footer>Thanks for choosing our site.</footer>
       `
     }
     try {

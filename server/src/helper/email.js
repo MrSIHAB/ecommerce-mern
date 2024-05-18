@@ -18,7 +18,7 @@ const emailWithNodemailer =async (emailData)=>{
 try {
         // getting email options from parameter
         let mailOptions = {
-            from: smtpUsername,
+            from: "Ababil",
             to: emailData.email,
             subject: emailData.subject,
             html: emailData.html
