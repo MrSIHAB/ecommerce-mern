@@ -36,8 +36,10 @@ const userSchema = new Schema(
       type: String,
       required: [true, "You must give a password."],
     },
-    profileImg: {
-      type: String,
+    image: {
+      type: Buffer,
+      contentType: String,
+      required: [true, "Profile image is required"]
     },
     isAdmin:{
       type: Boolean,

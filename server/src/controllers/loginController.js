@@ -22,13 +22,14 @@ const handlePostRegister = async (req, res, next) => {
   try {
     // gettitng data from frontend
     const { name, email, password, phone, address } = await req.body;
+    const image = req.file.buffer.toString('base64');
     /** Mongoose Configurations... */
     let isUserExist = await User.exists({email: email})
     if(isUserExist) next(createError(409, "User Already exist."));
 
     // -------------------------------------- Create JWT token
     const varifyToken = createJsonWebToken(
-    { name, email, password, phone, address },
+    { name, email, password, phone, address, image },
     JWT_ACTIVATION_KEY,
     "5m"
     )
