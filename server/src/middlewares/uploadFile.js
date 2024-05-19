@@ -1,6 +1,6 @@
 const multer = require("multer");
 const path = require("path");
-const { ALLOWED_FILE_TYPE, MAX_FILE_SIZE } = require('../config')
+const { ALLOWED_FILE_TYPE, MAX_FILE_SIZE } = require('../config/index.json')
 
 
 

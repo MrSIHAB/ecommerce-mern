@@ -13,11 +13,8 @@ const CLIENT_URL = process.env.CLIENT_URL || "http://127.0.0.1:3005";
 
 
 
-//  ===============   Registration   ==================
-const handleGetRegister = (req, res) => {
-  return res.status(200).send("Singup Form");
-};
-//  post register
+//  ===================   Registration   ====================
+
 const handlePostRegister = async (req, res, next) => {
   try {
     // gettitng data from frontend
@@ -62,7 +59,7 @@ const handlePostRegister = async (req, res, next) => {
       `
     }
     try {
-      // await emailWithNodemailer(emailData); // ---------- Sending Email
+      await emailWithNodemailer(emailData); // ---------- Sending Email
     } catch (error) {
       return next(createError(500, "Failed to send varification email."));
     }

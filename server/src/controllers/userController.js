@@ -4,6 +4,7 @@ const { successResponse } = require('../err/resopnse');
 const { findWithId } = require('../helper/findWithId');
 const { default: mongoose } = require('mongoose');
 const { deleteImage } = require('../helper/deleteImage');
+const { MAX_FILE_SIZE } = require('../config/index.json')
 
 
 // -------------------- Global Conf
@@ -66,7 +67,7 @@ const getUser = async (req, res, next) => {
   } catch (err) {
     if(err instanceof mongoose.Error)next(createError(404, "User not found."))
 
-    next(err);
+      return next(err);
   }
 };
 
@@ -86,7 +87,7 @@ const getUserById = async (req, res, next) => {
     })
     
   } catch (err) {
-    next(err);
+    return next(err);
   }
 };
 
@@ -96,12 +97,12 @@ const deleteUser = async (req, res, next) => {
   try {
     let id = req.params.id // Getting id from "api/users/:id"
     const user = await findWithId(User, id, options);
-
+    
     //  deleting user
     var userImagePath = user.profileImg
     await User.findByIdAndDelete({_id: id, isAdmin: false})
     deleteImage(userImagePath)
-
+    
     return successResponse(res, {
       statusCode: 200,
       message:`${user.name} has been deleted successfully.`,
@@ -109,9 +110,40 @@ const deleteUser = async (req, res, next) => {
     
   } catch (err) {
     if(err instanceof mongoose.Error) throw createError(404, "Could not delete the user.")
-    next(err);
+      return next(err);
   }
 };
+
+//  =========================   Deleting User By their ID   ==============================
+
+const updateUserById = async (req, res, next)=>{
+  try {
+    const userId = req.params.id;
+    await findWithId(User, userId, options)
+    const updateOptions = {new: true, runValidators: true, context: "query"}
+    const body = req.body;
+    var updates = {};
+
+    if(req.email) throw createError(400, "Email can't be changed.");
+    for(key in req.body){
+      if(['name', 'password', 'address', 'phone'].includes(key))
+        updates[key] = req[key];
+    }
+    if(req.file) updates.image = file?.buffer?.toString('base64');
+
+    let updateUser = await User.findByIdAndUpdate(userId, updates, updateOptions);
+    if(!updateUser) throw createError(404, "User with this id does not exist.");
+
+    return successResponse(res, {
+      statusCode: 200,
+      message: "User information updated sucessfully.",
+      payload: updateUser
+    })
+
+  } catch (error) {
+    return next(error);
+  }
+}
 
 
 
@@ -120,4 +152,5 @@ module.exports = {
   getUser,
   getUserById,
   deleteUser,
+  updateUserById,
 };
