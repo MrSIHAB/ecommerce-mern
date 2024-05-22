@@ -83,18 +83,22 @@ userSchema.pre("save", function (next) {
 userSchema.static("matchPassword", async function (email, password) {
   let user = await this.findOne({ email });
   if (!user) throw new Error("User not found!!");
-
+  
   let salt = user.salt;
   let hasedPassword = user.password;
-
-  const signinHash = crypto
-    .createHmac("sha256", salt)
-    .update(password)
-    .digest("hex");
-
+  
+  const signinHash = await crypto
+  .createHmac("sha256", salt)
+  .update(password)
+  .digest("hex");
+  
   if (signinHash !== hasedPassword) throw new Error("Incorrect Password !");
+  if (user.isBan) throw new Error("You're baned! Please contact authority.");
 
-  return { ...user, password: undefined, salt: undefined };
+  user.password = undefined;
+  user.salt = undefined;
+
+  return user;
 });
 
 //      -------------------------------------     Main Model

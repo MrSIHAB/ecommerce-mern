@@ -1,13 +1,14 @@
 const fs = require("fs").promises;
+const { defaultImgDest } = require('../config/index.json')
 
 const deleteImage = async (imgPath) => {
   try {
+    if(imgPath === defaultImgDest) return;
     await fs.access(imgPath);
     await fs.unlink(imgPath);
-    console.log("User image is deleted.");
-
+    return true;
   } catch (error) {
-      console.error("User image does not exist!")
+    throw new Error("Unsuccesfull")
   }
 };
 

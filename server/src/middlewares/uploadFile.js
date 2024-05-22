@@ -1,15 +1,21 @@
 const multer = require("multer");
 const path = require("path");
-const { ALLOWED_FILE_TYPE, MAX_FILE_SIZE } = require('../config/index.json')
+const { userImgDest, maxImgSize, allowedImgType } = require('../config/index.json')
 
 
 
-const storage = multer.memoryStorage();
+const storage = multer.diskStorage({
+    destination:(req, file, cb)=> cb(null, userImgDest),
+    filename: (req, file, cb)=>{
+        var ext = path.extname(file.originalname);
+        cb(null, Date.now() + '_' + file.originalname.length * 156 + ext);
+    }
+});
 const fileFilter = (req, file, cb) => {
     if(!file.mimetype.startsWith("image/"))
         return cb(new Error('Only image files are allowed'), false);
-    if(file.size > MAX_FILE_SIZE)
-        return cb(new Error(`Maximum image size is ${MAX_FILE_SIZE/1024}kb`), false);
+    if(file.size > maxImgSize)
+        return cb(new Error(`Maximum image size is ${maxImgSize/1024}kb`), false);
     if(!ALLOWED_FILE_TYPE.includes(file.mimetype))
         return cb(new Error("Only JPG, JPEG, PNG files are allowed"), false);
 

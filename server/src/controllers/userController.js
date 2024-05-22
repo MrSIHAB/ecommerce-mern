@@ -4,7 +4,7 @@ const { successResponse } = require('../err/resopnse');
 const { findWithId } = require('../helper/findWithId');
 const { default: mongoose } = require('mongoose');
 const { deleteImage } = require('../helper/deleteImage');
-const { MAX_FILE_SIZE } = require('../config/index.json')
+const { maxImgSize } = require('../config/index.json')
 
 
 // -------------------- Global Conf
@@ -78,7 +78,7 @@ const getUser = async (req, res, next) => {
 const getUserById = async (req, res, next) => {
   try {
     let id = req.params.id // Getting id from "api/users/:id"
-    const user = await findWithId(User, id, options);
+    const user = await findWithId(User, id);
     
     return successResponse(res, {
       statusCode: 200,
@@ -96,10 +96,11 @@ const getUserById = async (req, res, next) => {
 const deleteUser = async (req, res, next) => {
   try {
     let id = req.params.id // Getting id from "api/users/:id"
-    const user = await findWithId(User, id, options);
+    const user = await findWithId(User, id);
+    if(user.isAdmin = true) throw new Error("Admin Can't be deleted.")
     
     //  deleting user
-    var userImagePath = user.profileImg
+    var userImagePath = user.image;
     await User.findByIdAndDelete({_id: id, isAdmin: false})
     deleteImage(userImagePath)
     
@@ -114,25 +115,34 @@ const deleteUser = async (req, res, next) => {
   }
 };
 
-//  =========================   Deleting User By their ID   ==============================
+//  =========================   Updating User By ID   ==============================
 
 const updateUserById = async (req, res, next)=>{
   try {
     const userId = req.params.id;
-    await findWithId(User, userId, options)
+    var user = await findWithId(User, userId)
     const updateOptions = {new: true, runValidators: true, context: "query"}
     const body = req.body;
-    var updates = {};
 
     if(req.email) throw createError(400, "Email can't be changed.");
-    for(key in req.body){
+    for(key in body){
       if(['name', 'password', 'address', 'phone'].includes(key))
-        updates[key] = req[key];
+        user[key] = body[key];
     }
-    if(req.file) updates.image = file?.buffer?.toString('base64');
+    
+    //  Deleting and updating User image
+    try {
+      if(req.file?.path){
+        if(req.file.size > maxImgSize) throw new Error("Image too large.")
+        await deleteImage(user.image);
+        user.image = req.file.path;
+      }
+    } catch (error) {
+      if(error) throw new Error(error)
+    }
 
-    let updateUser = await User.findByIdAndUpdate(userId, updates, updateOptions);
-    if(!updateUser) throw createError(404, "User with this id does not exist.");
+    let updateUser = await User.findByIdAndUpdate(userId, user, updateOptions);
+    if(!updateUser) throw createError(404, "Changes wasn't saved!");
 
     return successResponse(res, {
       statusCode: 200,

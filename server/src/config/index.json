@@ -1,4 +1,6 @@
 {
-  "MAX_FILE_SIZE": 2097152,
-  "ALLOWED_FILE_TYPE": ["image/jpg", "image/jpeg", "image/png"]
+  "defaultImgDest": "/images/users/default.png",
+  "userImgDest": "public/images/users",
+  "maxImgSize": 2097152,
+  "allowedImgType": ["image/jpg", "image/jpeg", "image/png"]
 }

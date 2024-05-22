@@ -1,7 +1,7 @@
 const { default: mongoose } = require("mongoose");
 const createError = require("http-errors");
 
-const findWithId = async (Model, id, options = {}) => {
+const findWithId = async (Model, id, options = {passwoed: undefined, salt: undefined}) => {
   try {
     //  getting specific user
     let item = await Model.findById(id, options);

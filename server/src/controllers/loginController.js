@@ -7,8 +7,9 @@ const { emailWithNodemailer } = require("../helper/email");
 const jwt = require("jsonwebtoken");
 
 // Environment variables
-const JWT_ACTIVATION_KEY = process.env.JWT_ACTIVATION_KEY || "key not found";
-const CLIENT_URL = process.env.CLIENT_URL || "http://127.0.0.1:3005";
+const JWT_ACTIVATION_KEY = process.env.JWT_ACTIVATION_KEY || "akhdfk";
+const CLIENT_URL = process.env.CLIENT_URL || "";
+const JWT_ACCESS_KEY = process.env.JWT_ACCESS_KEY || " "
 
 
 
@@ -18,18 +19,17 @@ const CLIENT_URL = process.env.CLIENT_URL || "http://127.0.0.1:3005";
 const handlePostRegister = async (req, res, next) => {
   try {
     // gettitng data from frontend
-    const { name, email, password, phone, address } = await req.body;
-    const image = req.file.buffer.toString('base64');
+    const { name, email, password, phone, address } = req.body;
     /** Mongoose Configurations... */
-    let isUserExist = await User.exists({email: email})
-    if(isUserExist) next(createError(409, "User Already exist."));
+    let isUserExist = await User.exists({email})
+    if(isUserExist)return next(createError(409, "User Already exist."));
+
+    var info = { name, email, password, phone, address };
+    const image = req.file?.path;
+    if(image)info.image = image;
 
     // -------------------------------------- Create JWT token
-    const varifyToken = createJsonWebToken(
-    { name, email, password, phone, address, image },
-    JWT_ACTIVATION_KEY,
-    "5m"
-    )
+    const varifyToken = createJsonWebToken(info, JWT_ACTIVATION_KEY, "5m")
     // ------------------------------------ Preparing Email
     const emailData = {
       email,
@@ -68,7 +68,7 @@ const handlePostRegister = async (req, res, next) => {
     return successResponse(res, {
       statusCode: 200,
       message: `Please check your Email(${email}) for varification.`,
-      payload:{ varifyToken }
+      payload:{  }
     })
 
 
@@ -112,12 +112,24 @@ const handleUserActivation= async (req, res, next)=>{
 
 
 
-//  ===============   Login   ==================
-const handleGetLogin = (req, res) => {
-  return res.status(200).send("LoginForm");
-};
-const handlePostLogin = (req, res) => {
-  return res.status(200).send("You're logged in");
+//  ===============   SingIn   ==================
+const handlePostLogin = async (req, res, next) => {
+  try {
+    let { email, password } = req.body;
+    if(!email || !password) throw createError(400, "Bad request")
+    const user = await User.matchPassword(email, password);
+    if(!user) throw createError(404, "Singin faild");
+
+    let token = createJsonWebToken(payload, JWT_ACCESS_KEY, "360d")
+
+    return successResponse(res, {
+      statusCode: 200,
+      message: "User Logged in",
+      payload: user,
+    })
+  } catch (error) {
+    return next(error);
+  }
 };
 
 
@@ -130,10 +142,8 @@ const handleLogout = (req, res) => {
 
 
 module.exports = {
-  handleGetRegister,
   handlePostRegister,
   handleUserActivation,
-  handleGetLogin,
   handlePostLogin,
   handleLogout,
 };
