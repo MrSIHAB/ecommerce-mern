@@ -19,11 +19,11 @@ const validateUserRegistration = [
     .withMessage("Password is Required. Enter a strong password.")
     .isLength({ min: 6 })
     .withMessage("Password should be at least 6 character long.")
-    // .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$/)
-    // .withMessage(
-    //   "Password must contain one UpperCase letter, one LowerCase later, a number and a special character."
-    // )
-    ,
+  // .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$/)
+  // .withMessage(
+  //   "Password must contain one UpperCase letter, one LowerCase later, a number and a special character."
+  // )
+  ,
   body("address")
     .trim()
     .notEmpty()
@@ -37,13 +37,29 @@ const validateUserRegistration = [
     .isMobilePhone()
     .withMessage("Invalid number address"),
   body("image")
-    .custom((value, {req})=>{
-      if(!req.file || !req.file.buffer) throw new Error("Image required!");
+    .custom((value, { req }) => {
+      if (!req.file || !req.file.buffer) throw new Error("Image required!");
       return true;
     })
   ,
 ];
 
+
+
+//  ===============   Login Validation   ==================
+const validateUserLogin = [
+  body("email")
+    .trim()
+    .notEmpty()
+    .withMessage("Email is Required. Enter your regular email.")
+    .isEmail()
+    .withMessage("Invalid E-mail address. Please enter email correctly"),
+  body("password")
+    .notEmpty()
+    .withMessage("Password is Required. Enter a strong password.")
+]
+
 module.exports = {
   validateUserRegistration,
+  validateUserLogin,
 };

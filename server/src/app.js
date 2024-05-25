@@ -2,6 +2,7 @@
 const express = require("express");
 const morgan = require("morgan");
 const bodyParser = require("body-parser");
+const cookieParser = require('cookie-parser')
 const xxsClean = require("xss-clean");
 
 
@@ -16,6 +17,7 @@ require('dotenv').config()
 
 
 //  ====================    Register Npm Middlewares   ======================
+app.use(cookieParser());
 app.use(xxsClean());
 app.use(morgan("dev"));
 app.use(bodyParser.json());

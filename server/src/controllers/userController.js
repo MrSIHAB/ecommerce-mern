@@ -15,7 +15,6 @@ const options = {
 
 
 //  =========================   Getting all Users (For Admin)   =========================
-
 const getUser = async (req, res, next) => {
   /**
    * This handler will exicute all the users from database excluding Admin accounts.
@@ -74,11 +73,11 @@ const getUser = async (req, res, next) => {
 
 
 //  =========================   Getting User By their ID   ==============================
-
 const getUserById = async (req, res, next) => {
   try {
     let id = req.params.id // Getting id from "api/users/:id"
     const user = await findWithId(User, id);
+    if(!user) throw createError(404, "User does not exist!")
     
     return successResponse(res, {
       statusCode: 200,
@@ -91,8 +90,9 @@ const getUserById = async (req, res, next) => {
   }
 };
 
-//  =========================   Deleting User By their ID   ==============================
 
+
+//  =========================   Deleting User By their ID   ==============================
 const deleteUser = async (req, res, next) => {
   try {
     let id = req.params.id // Getting id from "api/users/:id"
@@ -115,8 +115,9 @@ const deleteUser = async (req, res, next) => {
   }
 };
 
-//  =========================   Updating User By ID   ==============================
 
+
+//  =========================   Updating User By ID   ==============================
 const updateUserById = async (req, res, next)=>{
   try {
     const userId = req.params.id;
@@ -157,10 +158,62 @@ const updateUserById = async (req, res, next)=>{
 
 
 
+//  =========================   Ban User   ==============================
+const handleBanUserById = async (req, res, next)=>{
+  try {
+    const id = req.params.id;
+    let user = await findWithId(User, id);
+
+    //  --------- Checking if user is Admin or already Banned
+    if(user.isAdmin) throw createError(409, "An Admin can't be banned!");
+    if(user.isBan) throw createError(409, `${user.name} was already banned!`);
+
+    //  --------- Banning user
+    const updateOptions = {new: true, runValidators: true, context: "query"};
+    let updateResult = await User.findByIdAndUpdate(id, {isBan: true}, updateOptions);
+    if(!updateResult) throw createError(400, "Process failed. User not found");
+
+    successResponse(res, {
+      statusCode: 200,
+      message: `${user.name} was banned successfully.`
+    })
+  } catch (error) {
+    return next(error);
+  }
+}
+
+
+
+//  =========================   UnBan a Banned user   ==============================
+const handleUnbanUserById = async (req, res, next)=>{
+  try {
+    const id = req.params.id;
+    let user = await findWithId(User, id);
+
+    //  --------- Checking if user is UnBanned
+    if(!user.isBan) throw createError(409, `${user.name} is not a banned user.`);
+
+    //  --------- Banning user
+    const updateOptions = {new: true, runValidators: true, context: "query"};
+    let updateResult = await User.findByIdAndUpdate(id, {isBan: false}, updateOptions);
+    if(!updateResult) throw createError(400, "Process failed. User not found");
+
+    successResponse(res, {
+      statusCode: 200,
+      message: `${user.name} was unbanned successfully.`
+    })
+  } catch (error) {
+    return next(error);
+  }
+}
+
+
 /** */
 module.exports = {
   getUser,
   getUserById,
   deleteUser,
   updateUserById,
+  handleBanUserById,
+  handleUnbanUserById,
 };

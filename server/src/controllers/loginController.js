@@ -7,9 +7,9 @@ const { emailWithNodemailer } = require("../helper/email");
 const jwt = require("jsonwebtoken");
 
 // Environment variables
-const JWT_ACTIVATION_KEY = process.env.JWT_ACTIVATION_KEY || "akhdfk";
-const CLIENT_URL = process.env.CLIENT_URL || "";
-const JWT_ACCESS_KEY = process.env.JWT_ACCESS_KEY || " "
+const JWT_ACTIVATION_KEY = process.env.JWT_ACTIVATION_KEY;
+const CLIENT_URL = process.env.CLIENT_URL;
+const JWT_ACCESS_KEY = process.env.JWT_ACCESS_KEY
 
 
 
@@ -120,7 +120,13 @@ const handlePostLogin = async (req, res, next) => {
     const user = await User.matchPassword(email, password);
     if(!user) throw createError(404, "Singin faild");
 
-    let token = createJsonWebToken(payload, JWT_ACCESS_KEY, "360d")
+    let token = await createJsonWebToken( { user }, JWT_ACCESS_KEY, "15m");
+    res.cookie("accessToken", token, {
+      maxAge: 15 * 60 * 1000,
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none'
+    })
 
     return successResponse(res, {
       statusCode: 200,
@@ -135,8 +141,17 @@ const handlePostLogin = async (req, res, next) => {
 
 
 //  ===============   Logout   ==================
-const handleLogout = (req, res) => {
-  return res.status(200).send("Logged Out");
+const handleLogout = (req, res, next) => {
+  try {
+    res.clearCookie('accessToken')
+    
+    return successResponse(res, {
+      statusCode: 200,
+      message: "User Logged Out successfully."
+    })
+  } catch (error) {
+    next(error)
+  }
 };
 
 

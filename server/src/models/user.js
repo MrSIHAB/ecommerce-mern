@@ -1,5 +1,7 @@
 const { Schema, model } = require("mongoose");
 const crypto = require("crypto");
+const createError = require('http-errors');
+const {defaultImgDest} = require('../config/index.json')
 
 //    -----------------------------------------------------------------------------  mongodb user schema
 const userSchema = new Schema(
@@ -37,9 +39,8 @@ const userSchema = new Schema(
       required: [true, "You must give a password."],
     },
     image: {
-      type: Buffer,
-      contentType: String,
-      required: [true, "Profile image is required"]
+      type: String,
+      default: defaultImgDest
     },
     isAdmin:{
       type: Boolean,
@@ -84,16 +85,16 @@ userSchema.static("matchPassword", async function (email, password) {
   let user = await this.findOne({ email });
   if (!user) throw new Error("User not found!!");
   
-  let salt = user.salt;
-  let hasedPassword = user.password;
+  let salt = await user.salt;
+  let hasedPassword = await user.password;
   
   const signinHash = await crypto
   .createHmac("sha256", salt)
   .update(password)
   .digest("hex");
   
-  if (signinHash !== hasedPassword) throw new Error("Incorrect Password !");
-  if (user.isBan) throw new Error("You're baned! Please contact authority.");
+  if (signinHash !== hasedPassword) throw createError(403, "Incorrect Password !");
+  if (user.isBan) throw createError(401, "You're baned! Please contact authority.");
 
   user.password = undefined;
   user.salt = undefined;
