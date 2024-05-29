@@ -4,7 +4,7 @@ const { successResponse } = require('../err/resopnse');
 const { findWithId } = require('../helper/findWithId');
 const { default: mongoose } = require('mongoose');
 const { deleteImage } = require('../helper/deleteImage');
-const { maxImgSize } = require('../config/index.json')
+const { maxImgSize } = require('../config/ppConfig.json')
 
 
 // -------------------- Global Conf
@@ -159,23 +159,24 @@ const updateUserById = async (req, res, next)=>{
 
 
 //  =========================   Ban User   ==============================
-const handleBanUserById = async (req, res, next)=>{
+const handleManageUserById = async (req, res, next)=>{
   try {
     const id = req.params.id;
     let user = await findWithId(User, id);
 
     //  --------- Checking if user is Admin or already Banned
-    if(user.isAdmin) throw createError(409, "An Admin can't be banned!");
-    if(user.isBan) throw createError(409, `${user.name} was already banned!`);
+    if(user.isAdmin) throw createError(409, "An Admin can't be modified!");
+    
+    let BanOption = req.body.ban;
 
     //  --------- Banning user
     const updateOptions = {new: true, runValidators: true, context: "query"};
-    let updateResult = await User.findByIdAndUpdate(id, {isBan: true}, updateOptions);
-    if(!updateResult) throw createError(400, "Process failed. User not found");
+    let updateResult = await User.findByIdAndUpdate(id, {isBan: BanOption}, updateOptions);
+    if(!updateResult) throw createError(400, "Process failed.");
 
     successResponse(res, {
       statusCode: 200,
-      message: `${user.name} was banned successfully.`
+      message: `${user.name} was ${updateResult.isBan? "banned": "unbanned"} successfully.`
     })
   } catch (error) {
     return next(error);
@@ -184,28 +185,6 @@ const handleBanUserById = async (req, res, next)=>{
 
 
 
-//  =========================   UnBan a Banned user   ==============================
-const handleUnbanUserById = async (req, res, next)=>{
-  try {
-    const id = req.params.id;
-    let user = await findWithId(User, id);
-
-    //  --------- Checking if user is UnBanned
-    if(!user.isBan) throw createError(409, `${user.name} is not a banned user.`);
-
-    //  --------- Banning user
-    const updateOptions = {new: true, runValidators: true, context: "query"};
-    let updateResult = await User.findByIdAndUpdate(id, {isBan: false}, updateOptions);
-    if(!updateResult) throw createError(400, "Process failed. User not found");
-
-    successResponse(res, {
-      statusCode: 200,
-      message: `${user.name} was unbanned successfully.`
-    })
-  } catch (error) {
-    return next(error);
-  }
-}
 
 
 /** */
@@ -214,6 +193,5 @@ module.exports = {
   getUserById,
   deleteUser,
   updateUserById,
-  handleBanUserById,
-  handleUnbanUserById,
+  handleManageUserById
 };

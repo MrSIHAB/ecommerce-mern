@@ -3,8 +3,7 @@ const {
   getUserById,
   deleteUser,
   updateUserById,
-  handleBanUserById,
-  handleUnbanUserById,
+  handleManageUserById,
 } = require("../controllers/userController");
 const { isLoggedIn, isAdmin } = require("../middlewares/auth");
 const upload = require('../middlewares/uploadFile')
@@ -17,7 +16,6 @@ userRoute.get("/", isLoggedIn, isAdmin, getUser);
 userRoute.get("/:id", isLoggedIn, getUserById);
 userRoute.delete("/:id", isLoggedIn, deleteUser);
 userRoute.put("/:id", isLoggedIn, upload.single("image"), updateUserById);
-userRoute.put("/ban-user/:id", isLoggedIn, isAdmin, handleBanUserById);
-userRoute.put("/unban-user/:id", isLoggedIn, isAdmin, handleUnbanUserById);
+userRoute.put("/manage-user/:id", isLoggedIn, isAdmin, handleManageUserById);
 
 module.exports = userRoute;

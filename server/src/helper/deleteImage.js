@@ -1,5 +1,5 @@
 const fs = require("fs").promises;
-const { defaultImgDest } = require('../config/index.json')
+const { defaultImgDest } = require('../config/ppConfig.json')
 
 const deleteImage = async (imgPath) => {
   try {

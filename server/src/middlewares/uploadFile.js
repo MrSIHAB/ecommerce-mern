@@ -1,6 +1,6 @@
 const multer = require("multer");
 const path = require("path");
-const { userImgDest, maxImgSize, allowedImgType } = require('../config/index.json')
+const { userImgDest, maxImgSize, allowedImgType } = require('../config/ppConfig.json');
 
 
 
@@ -16,7 +16,7 @@ const fileFilter = (req, file, cb) => {
         return cb(new Error('Only image files are allowed'), false);
     if(file.size > maxImgSize)
         return cb(new Error(`Maximum image size is ${maxImgSize/1024}kb`), false);
-    if(!ALLOWED_FILE_TYPE.includes(file.mimetype))
+    if(!allowedImgType.includes(file.mimetype))
         return cb(new Error("Only JPG, JPEG, PNG files are allowed"), false);
 
     return cb(null, true);

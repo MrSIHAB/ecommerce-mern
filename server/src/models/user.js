@@ -1,7 +1,7 @@
 const { Schema, model } = require("mongoose");
 const crypto = require("crypto");
 const createError = require('http-errors');
-const {defaultImgDest} = require('../config/index.json')
+const {defaultImgDest} = require('../config/ppConfig.json')
 
 //    -----------------------------------------------------------------------------  mongodb user schema
 const userSchema = new Schema(
