@@ -158,7 +158,7 @@ const updateUserById = async (req, res, next)=>{
 
 
 
-//  =========================   Ban User   ==============================
+//  =========================   Manage Ban User   ==============================
 const handleManageUserById = async (req, res, next)=>{
   try {
     const id = req.params.id;

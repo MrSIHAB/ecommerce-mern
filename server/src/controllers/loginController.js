@@ -3,7 +3,7 @@ const User = require("../models/user");
 const { default: mongoose } = require("mongoose");
 const { successResponse } = require("../err/resopnse");
 const { createJsonWebToken } = require("../helper/jsonWebToken");
-const { emailWithNodemailer } = require("../helper/email");
+const { emailWithNodemailer } = require("../services/email");
 const jwt = require("jsonwebtoken");
 
 // Environment variables
