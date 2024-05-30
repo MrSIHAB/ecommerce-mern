@@ -1,17 +1,22 @@
 const createError = require('http-errors')
-const User = require("../models/user");
-const { successResponse } = require('../err/resopnse');
-const { findWithId } = require('../helper/findWithId');
 const { default: mongoose } = require('mongoose');
-const { deleteImage } = require('../helper/deleteImage');
-const { maxImgSize } = require('../config/ppConfig.json')
 
+const User = require("../models/user");
+
+const { findWithId } = require('../helper/findWithId');
+const { successResponse } = require('../err/resopnse');
+const { deleteImage } = require('../helper/deleteImage');
+const { maxImgSize } = require('../config/ppConfig.json');
+const { findAllUser } = require('../services/user');
+const { usersLimitPerPage } = require('../config/defaultPagination.json')
 
 // -------------------- Global Conf
 const options = {
   password: 0, // Hiding password
   salt: 0 // Hidding salt
 }
+
+
 
 
 //  =========================   Getting all Users (For Admin)   =========================
@@ -29,38 +34,16 @@ const getUser = async (req, res, next) => {
   try {
     let search = req.query.search || ""; // search Query (frontend)
     let page = Number(req.query.page) || 1; // What is current page (frontend)
-    let limit = Number(req.query.limit) || 5; // user's limit per page (frontend)
-    //  regEx to return a user including similer query
-    var searchRegEx = new RegExp(".*" + search + ".*", 'i');
+    let limit = Number(req.query.limit) || usersLimitPerPage; // user's limit per page (frontend)
     
-    //  Filtering search to get more better result
-    let filter = {
-        isAdmin: {$ne: true}, // removing Admin accounts
-        $or: [
-            {name: {$regex: searchRegEx}},// looking for match in name
-            {email: {$regex: searchRegEx}},// looking for match in email
-            {phone: {$regex: searchRegEx}},// looking for match in phone
-        ]
-    }
-
-    // ---------------------------------------------------- Getting users from DB
-    const users = await User.find(filter, options).limit(limit).skip((page - 1) * limit);
-    if(!users) throw createError(404, "No users found")
-    const count = await User.find(filter).countDocuments()
+    // Using findAllUser service
+    const payload = await findAllUser(search, limit, page, options);
 
     //  success response is from error and success handeler file "err"
     return successResponse(res, {
         statusCode: 200,
         message:"users were returned successfully.",
-        payload: {
-            users,
-            pagination:{
-              totalPage: Math.ceil(count/limit),
-              currentPage: page,
-              previousPage: page - 1 > 0? page - 1 : null,
-              nextPage: page<Math.ceil(count/limit)? page + 1: null
-            }
-        }
+        payload,
     })
 
   } catch (err) {
@@ -86,6 +69,7 @@ const getUserById = async (req, res, next) => {
     })
     
   } catch (err) {
+    if(err instanceof mongoose.Error.CastError) throw createError(400, "Invalid ID")
     return next(err);
   }
 };
@@ -110,8 +94,9 @@ const deleteUser = async (req, res, next) => {
     })
     
   } catch (err) {
-    if(err instanceof mongoose.Error) throw createError(404, "Could not delete the user.")
-      return next(err);
+    if(err instanceof mongoose.Error) throw createError(404, "Could not delete the user.");
+    if(err instanceof mongoose.Error.CastError) throw createError(400, "Invalid ID");
+    return next(err);
   }
 };
 
@@ -152,6 +137,7 @@ const updateUserById = async (req, res, next)=>{
     })
 
   } catch (error) {
+    if(err instanceof mongoose.Error.CastError) throw createError(400, "Invalid ID");
     return next(error);
   }
 }
@@ -179,6 +165,7 @@ const handleManageUserById = async (req, res, next)=>{
       message: `${user.name} was ${updateResult.isBan? "banned": "unbanned"} successfully.`
     })
   } catch (error) {
+    if(err instanceof mongoose.Error.CastError) throw createError(400, "Invalid ID");
     return next(error);
   }
 }

@@ -1,5 +1,7 @@
 # Extra
 src/data.json
+src/routers/seedRouter.js
+src/controllers/seedController.js
 
 
 # Logs
