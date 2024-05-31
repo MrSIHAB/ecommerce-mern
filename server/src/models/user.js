@@ -3,6 +3,8 @@ const crypto = require("crypto");
 const createError = require('http-errors');
 const {defaultImgDest} = require('../config/ppConfig.json')
 
+const hashPassword = require('../helper/passwordHash')
+
 //    -----------------------------------------------------------------------------  mongodb user schema
 const userSchema = new Schema(
   {
@@ -64,16 +66,13 @@ const userSchema = new Schema(
  */
 
 //   --------------------------------------------------------------------    Hashing Password before saving data
-userSchema.pre("save", function (next) {
+userSchema.pre("save", async function (next) {
   let user = this;
   if (!user.isModified("password")) return; // if password is already hashed,
 
   let salt = crypto.randomBytes(16).toString(); // making sault
   // hashing password
-  let hasedPassword = crypto
-    .createHmac("sha256", salt)
-    .update(user.password)
-    .digest("hex");
+  let hasedPassword = await hashPassword(user.password, salt);
 
   this.salt = salt; // saving sault
   this.password = hasedPassword; // saving hashed password
@@ -88,10 +87,7 @@ userSchema.static("matchPassword", async function (email, password) {
   let salt = await user.salt;
   let hasedPassword = await user.password;
   
-  const signinHash = await crypto
-  .createHmac("sha256", salt)
-  .update(password)
-  .digest("hex");
+  const signinHash = await hashPassword(password, salt)
   
   if (signinHash !== hasedPassword) throw createError(403, "Incorrect Password !");
   if (user.isBan) throw createError(401, "You're baned! Please contact authority.");

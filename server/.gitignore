@@ -2,6 +2,9 @@
 src/data.json
 src/routers/seedRouter.js
 src/controllers/seedController.js
+public/images/users/*
+public/images/products/*
+public/videos/*
 
 
 # Logs

@@ -34,8 +34,11 @@ const isLoggedIn = async (req, res, next)=>{
             throw next(createError(400, "Invalid access token!!!"));
         };
 
-        const user = await findWithId(User, decoded.user._id)
-        req.user = user;
+        if (req.path === "/update-password") {
+            req.user = await findWithId(User, decoded.user._id, {password: 0});            
+        } else {
+            req.user = await findWithId(User, decoded.user._id)
+        }
 
         return next();
     } catch (error) {

@@ -36,9 +36,13 @@ const handlePostRegister = async (req, res, next) => {
       subject: "account activation mail.",
       html: `
         <h2>Hello ${name} !</h2>
-        <p>Please click the link bellow to confirm your E-mail and activate your account.</p>
+        <p>This email has been sent from Test-ecommerce site.
+          You recently filled an singup form in our site with this email.
+          For corfirmation, we need to verify your email address.
+          Please click bellow to verify your account.
+        </p>
         <a 
-          href="${CLIENT_URL}/api/activate/${varifyToken}" 
+          href="${CLIENT_URL}/api/verify/${varifyToken}" 
           target="_blank"
         >
           <button
@@ -55,7 +59,7 @@ const handlePostRegister = async (req, res, next) => {
             Activate account
           </button>
         </a>
-        <footer>Thanks for choosing our site.</footer>
+        <footer>Thanks for choosing our site. Best of luck...</footer>
       `
     }
     try {
@@ -68,7 +72,9 @@ const handlePostRegister = async (req, res, next) => {
     return successResponse(res, {
       statusCode: 200,
       message: `Please check your Email(${email}) for varification.`,
-      payload:{  }
+      payload:{ 
+        token: varifyToken, //! removeable
+      }
     })
 
 
@@ -85,7 +91,7 @@ const handlePostRegister = async (req, res, next) => {
 //  ===============   Varify account   ==================
 const handleUserActivation= async (req, res, next)=>{
   try {
-    let token = req.body.token // getting token from frontend
+    let token = req.params.token // getting token from frontend
     if(!token) throw createError(404, "Token not found!!!")
 
     try {

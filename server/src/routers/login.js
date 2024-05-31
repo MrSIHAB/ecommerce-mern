@@ -21,7 +21,7 @@ router
     runValidator,
     handlePostRegister
   );
-router.route("/verify").get(isLoggedOut ,handleUserActivation);
+router.route("/verify/:token").get(isLoggedOut ,handleUserActivation);
 router.route("/login").post(isLoggedOut, validateUserLogin, runValidator, handlePostLogin);
 router.route("/logout").post(isLoggedIn, handleLogout);
 

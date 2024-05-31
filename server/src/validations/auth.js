@@ -37,10 +37,11 @@ const validateUserRegistration = [
     .isMobilePhone()
     .withMessage("Invalid number address"),
   body("image")
-    .custom((value, { req }) => {
-      if (!req.file || !req.file.buffer) throw new Error("Image required!");
-      return true;
-    })
+    .optional()
+    // .custom((value, { req }) => {
+    //   if (!req.file || !req.file.buffer) throw new Error("Image required!");
+    //   return true;
+    // })
   ,
 ];
 

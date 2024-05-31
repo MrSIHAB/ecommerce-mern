@@ -8,7 +8,9 @@ const { successResponse } = require('../err/resopnse');
 const { deleteImage } = require('../helper/deleteImage');
 const { maxImgSize } = require('../config/ppConfig.json');
 const { findAllUser } = require('../services/user');
-const { usersLimitPerPage } = require('../config/defaultPagination.json')
+const { usersLimitPerPage } = require('../config/pagination.json')
+
+const hashPassword = require('../helper/passwordHash')
 
 // -------------------- Global Conf
 const options = {
@@ -175,20 +177,27 @@ const handleManageUserById = async (req, res, next)=>{
 //  =========================   Update User's password   ==============================
 const handleUpdatePassword = async (req, res, next)=>{
   try {
-    let { email, _id } = req.user
-    const { oldPassword, newPassword, confirmPassword } = req.body;
+    let { email, _id, salt } = await req.user // isLoggedIn(middleware)
+    const { oldPassword, newPassword, confirmPassword } = req.body; // frontend
 
-  try {
-    let user = User.matchPassword(email, oldPassword);
-  } catch (error) {
-    throw createError(404, "Wrong email/password!!")
-  }
-
+    // checking existing password
+    try {
+      var user = await User.matchPassword(email, oldPassword);
+    } catch (error) {
+      throw createError(400, "Wrong email/password!!")
+    }
+    if(!user) throw createError(404, "user not found");
+    if(newPassword !== confirmPassword) throw createError(406, "Confirm your password correctly");
+    
+    //  Hashing newPassword
+    let password = await hashPassword(newPassword, salt);
+    let updatedUser = await User.findByIdAndUpdate(_id, {password}, {new: true} ); //update
+    if(!updatedUser) throw createError(400, "Proccess faild")
 
     return successResponse(res,{
       statusCode: 200,
       message: "Password Updated succcessfully",
-      payload: user,
+      payload: {updatedUser},
     })
   } catch (error) {
     return next(error);
