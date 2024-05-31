@@ -30,7 +30,7 @@ app.use(rateLimiter);
 
 //  ========================    Importig Routers   ======================
 const getAllUserRoute = require("./routers/user"); // getting all users
-const seedRoute = require("./routers/seedRouter"); // SeedRoute
+const seedRoute = require("./routers/seedRouter") || null; // SeedRoute
 const loginRoute = require("./routers/login") // SignUP, Login, Logout
 
 

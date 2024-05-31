@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const createError = require("http-errors");
 const User = require("../models/user");
+const { findWithId } = require("../helper/findWithId");
 const JWT_ACCESS_KEY = process.env.JWT_ACCESS_KEY;
 
 
@@ -33,7 +34,8 @@ const isLoggedIn = async (req, res, next)=>{
             throw next(createError(400, "Invalid access token!!!"));
         };
 
-        req.user = decoded.user;
+        const user = await findWithId(User, decoded.user._id)
+        req.user = user;
 
         return next();
     } catch (error) {

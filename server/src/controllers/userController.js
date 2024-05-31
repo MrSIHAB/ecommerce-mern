@@ -79,7 +79,7 @@ const getUserById = async (req, res, next) => {
 //  =========================   Deleting User By their ID   ==============================
 const deleteUser = async (req, res, next) => {
   try {
-    let id = req.params.id // Getting id from "api/users/:id"
+    let id = req.user._id // Getting id from "api/users/:id"
     const user = await findWithId(User, id);
     if(user.isAdmin = true) throw new Error("Admin Can't be deleted.")
     
@@ -105,7 +105,7 @@ const deleteUser = async (req, res, next) => {
 //  =========================   Updating User By ID   ==============================
 const updateUserById = async (req, res, next)=>{
   try {
-    const userId = req.params.id;
+    const userId = req.user._id;
     var user = await findWithId(User, userId)
     const updateOptions = {new: true, runValidators: true, context: "query"}
     const body = req.body;
@@ -172,6 +172,31 @@ const handleManageUserById = async (req, res, next)=>{
 
 
 
+//  =========================   Update User's password   ==============================
+const handleUpdatePassword = async (req, res, next)=>{
+  try {
+    let { email, _id } = req.user
+    const { oldPassword, newPassword, confirmPassword } = req.body;
+
+  try {
+    let user = User.matchPassword(email, oldPassword);
+  } catch (error) {
+    throw createError(404, "Wrong email/password!!")
+  }
+
+
+    return successResponse(res,{
+      statusCode: 200,
+      message: "Password Updated succcessfully",
+      payload: user,
+    })
+  } catch (error) {
+    return next(error);
+  }
+}
+
+
+
 
 
 /** */
@@ -180,5 +205,6 @@ module.exports = {
   getUserById,
   deleteUser,
   updateUserById,
-  handleManageUserById
+  handleManageUserById,
+  handleUpdatePassword,
 };
