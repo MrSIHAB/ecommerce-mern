@@ -9,8 +9,10 @@ const { deleteImage } = require('../helper/deleteImage');
 const { maxImgSize } = require('../config/ppConfig.json');
 const { findAllUser } = require('../services/user');
 const { usersLimitPerPage } = require('../config/pagination.json')
-
 const hashPassword = require('../helper/passwordHash')
+
+const jwtForgetPassKey = process.env.JWT_RESET_PASSWORD_KEY;
+const CLIENT_URL = process.env.CLIENT_URL;
 
 // -------------------- Global Conf
 const options = {
@@ -206,6 +208,70 @@ const handleUpdatePassword = async (req, res, next)=>{
 
 
 
+//  =========================   Update User's password   ==============================
+const handleForgetPassword = async (req, res, next)=>{
+  try {
+    const { email } = req.body;
+    let user = await User.findOne({ email }).slice(-password);
+    if(!user) throw createError(404, "User dosen't exist.");
+ 
+     // -------------------------------------- Create JWT token
+     const resetToken = createJsonWebToken(
+      { email, id: user._id},
+      jwtForgetPassKey,
+      "10m"
+     )
+     // ------------------------------------ Preparing Email
+     const emailData = {
+       email,
+       subject: "Recover Password.",
+       html: `
+         <h2>Hello ${user.name} !</h2>
+         <p>This email has been sent from Test-ecommerce site.
+           We've got request of forget password of this email address.
+           please Click the link below to reset your password.
+         </p>
+         <a 
+           href="${CLIENT_URL}/api/users/reset-password/${resetToken}" 
+           target="_blank"
+         >
+           <button
+           style="
+             height: 50px;
+             width: 300px;
+             border-radius: 30px;
+             background: #0099ff;
+             color: #001;
+             border: 0;
+             outline: 0;
+           "
+           >
+             Reset Password
+           </button>
+         </a>
+         <footer>Thanks for choosing our site. Best of luck...</footer>
+       `
+     }
+     try {
+       await emailWithNodemailer(emailData); // ---------- Sending Email
+     } catch (error) {
+       return next(createError(500, "Failed to send varification email."));
+     }
+ 
+     // if everything went right...
+     return successResponse(res, {
+       statusCode: 200,
+       message: `Please check your Email(${email}) for varification.`,
+       payload:{ 
+         token: varifyToken, //! removeable
+       }
+     })
+ 
+  } catch (error) {
+    return next(error);
+  }
+}
+
 
 
 /** */
@@ -216,4 +282,5 @@ module.exports = {
   updateUserById,
   handleManageUserById,
   handleUpdatePassword,
+  handleForgetPassword,
 };
