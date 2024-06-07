@@ -1,5 +1,7 @@
+const crypto = require('crypto')
 const createError = require('http-errors')
 const { default: mongoose } = require('mongoose');
+const jwt = require('jsonwebtoken');
 
 const User = require("../models/user");
 
@@ -9,7 +11,8 @@ const { deleteImage } = require('../helper/deleteImage');
 const { maxImgSize } = require('../config/ppConfig.json');
 const { findAllUser } = require('../services/user');
 const { usersLimitPerPage } = require('../config/pagination.json')
-const hashPassword = require('../helper/passwordHash')
+const hashPassword = require('../helper/passwordHash');
+const passwordHash = require('../helper/passwordHash');
 
 const jwtForgetPassKey = process.env.JWT_RESET_PASSWORD_KEY;
 const CLIENT_URL = process.env.CLIENT_URL;
@@ -208,7 +211,7 @@ const handleUpdatePassword = async (req, res, next)=>{
 
 
 
-//  =========================   Update User's password   ==============================
+//  =========================   Forget password   ==============================
 const handleForgetPassword = async (req, res, next)=>{
   try {
     const { email } = req.body;
@@ -217,7 +220,7 @@ const handleForgetPassword = async (req, res, next)=>{
  
      // -------------------------------------- Create JWT token
      const resetToken = createJsonWebToken(
-      { email, id: user._id},
+      { email, id: user._id, salt: user.salt },
       jwtForgetPassKey,
       "10m"
      )
@@ -255,7 +258,7 @@ const handleForgetPassword = async (req, res, next)=>{
      try {
        await emailWithNodemailer(emailData); // ---------- Sending Email
      } catch (error) {
-       return next(createError(500, "Failed to send varification email."));
+       return next(createError(500, "Failed to send email."));
      }
  
      // if everything went right...
@@ -274,6 +277,34 @@ const handleForgetPassword = async (req, res, next)=>{
 
 
 
+//  =========================   Reset password   ==============================
+const handleResetPassword = async (req, res, next)=>{
+  try {
+    const token = req.params.token;
+    const password = req.body.password;
+
+    const deCodedToken = await jwt.verify(token, jwtForgetPassKey);
+    if(!deCodedToken) throw createError(402, "Unauthorized token");
+    let newSalt = crypto.randomBytes(16).toString(); // making sault
+    const hashedPassword = await passwordHash(password, newSalt);
+
+    const user = User.findOneAndUpdate({
+      email: deCodedToken.email,
+      salt: deCodedToken.salt,
+      _id: deCodedToken.id
+    },{password: hashPassword, salt: newSalt })
+
+    return successResponse(res, {
+      statusCode: 200,
+      message: "Successfully Reset password.",
+      payload: {user}
+    })
+  } catch (error) {
+    return next(error)
+  }
+}
+
+
 /** */
 module.exports = {
   getUser,
@@ -283,4 +314,5 @@ module.exports = {
   handleManageUserById,
   handleUpdatePassword,
   handleForgetPassword,
+  handleResetPassword,
 };

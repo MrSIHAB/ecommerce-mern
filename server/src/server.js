@@ -6,8 +6,8 @@ const PORT = process.env.PORT;
 // connect(MongoURI, ()=> console.log("Database Connected successfully..."))
 
 app.listen(PORT, async () => {
-  console.log(`Server is running at http://localhost:${PORT}`);
   await connectDB();
+  console.log(`Server is running at http://localhost:${PORT}`);
 });
 
 /* This exec() runs terminal command. We're opening this api url with google chrome below */

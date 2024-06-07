@@ -1,4 +1,4 @@
-const { body } = require("express-validator");
+const { body, param } = require("express-validator");
 
 //  ===============   Registration   ==================
 const validateUserRegistration = [
@@ -81,9 +81,28 @@ const validateReplacePassword = [
 //  ===============   Login Validation   ==================
 const validateForgetPassword = [
   body("email")
-    .isEmpty().withMessage("Email is required to recover password.")
+    .notEmpty().withMessage("Email is required to recover password.")
     .isEmail().withMessage("Wrong Email Address"),
 ]
+
+
+//  ===============   Login Validation   ==================
+const validateResetPassword = [
+  param("token")
+    .trim()
+    .notEmpty().withMessage("Token not found")
+  ,
+  body("password")
+    .notEmpty().withMessage("Pleasr ensure your new password")
+    .isLength({ min: 6 })
+    .withMessage("Password should be at least 6 character long.")
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$/)
+    .withMessage(
+      "Password must contain UpperCase & LowerCase later, a number and a special character."
+    )
+  ,
+]
+
 
 
 module.exports = {
@@ -91,4 +110,5 @@ module.exports = {
   validateUserLogin,
   validateReplacePassword,
   validateForgetPassword,
+  validateResetPassword,
 };
