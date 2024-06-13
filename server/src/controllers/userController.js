@@ -11,7 +11,8 @@ const { deleteImage } = require('../helper/deleteImage');
 const { maxImgSize } = require('../config/ppConfig.json');
 const { findAllUser } = require('../services/user');
 const { usersLimitPerPage } = require('../config/pagination.json')
-const hashPassword = require('../helper/passwordHash');
+const { createJsonWebToken } = require('../helper/jsonWebToken');
+const { emailWithNodemailer } = require('../services/email')
 const passwordHash = require('../helper/passwordHash');
 
 const jwtForgetPassKey = process.env.JWT_RESET_PASSWORD_KEY;
@@ -195,7 +196,7 @@ const handleUpdatePassword = async (req, res, next)=>{
     if(newPassword !== confirmPassword) throw createError(406, "Confirm your password correctly");
     
     //  Hashing newPassword
-    let password = await hashPassword(newPassword, salt);
+    let password = await passwordHash(newPassword, salt);
     let updatedUser = await User.findByIdAndUpdate(_id, {password}, {new: true} ); //update
     if(!updatedUser) throw createError(400, "Proccess faild")
 
@@ -215,7 +216,7 @@ const handleUpdatePassword = async (req, res, next)=>{
 const handleForgetPassword = async (req, res, next)=>{
   try {
     const { email } = req.body;
-    let user = await User.findOne({ email }).slice(-password);
+    let user = await User.findOne({ email });
     if(!user) throw createError(404, "User dosen't exist.");
  
      // -------------------------------------- Create JWT token
@@ -266,7 +267,7 @@ const handleForgetPassword = async (req, res, next)=>{
        statusCode: 200,
        message: `Please check your Email(${email}) for varification.`,
        payload:{ 
-         token: varifyToken, //! removeable
+         token: resetToken, //! removeable
        }
      })
  
@@ -280,19 +281,19 @@ const handleForgetPassword = async (req, res, next)=>{
 //  =========================   Reset password   ==============================
 const handleResetPassword = async (req, res, next)=>{
   try {
-    const token = req.params.token;
-    const password = req.body.password;
+    const { token, password } = req.body;
 
     const deCodedToken = await jwt.verify(token, jwtForgetPassKey);
     if(!deCodedToken) throw createError(402, "Unauthorized token");
     let newSalt = crypto.randomBytes(16).toString(); // making sault
     const hashedPassword = await passwordHash(password, newSalt);
-
-    const user = User.findOneAndUpdate({
+    
+    const user = await User.findOneAndUpdate({
       email: deCodedToken.email,
       salt: deCodedToken.salt,
       _id: deCodedToken.id
-    },{password: hashPassword, salt: newSalt })
+    },{password: hashedPassword, salt: newSalt }, {new: true});
+    console.log(user)
 
     return successResponse(res, {
       statusCode: 200,

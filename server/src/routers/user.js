@@ -37,7 +37,7 @@ userRoute.post("/forget-password",
   runValidator,
   handleForgetPassword
 );
-userRoute.put('/reset-password/:token',
+userRoute.put('/reset-password',
   validateResetPassword,
   runValidator,
   handleResetPassword

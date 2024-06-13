@@ -88,7 +88,7 @@ const validateForgetPassword = [
 
 //  ===============   Login Validation   ==================
 const validateResetPassword = [
-  param("token")
+  body("token")
     .trim()
     .notEmpty().withMessage("Token not found")
   ,
