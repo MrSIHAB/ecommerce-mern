@@ -1,5 +1,5 @@
 /**
- * Just normally set any type of cookie
+ *  Just normally set any type of cookie
  * **maxAge** follow days. set an Integer value that will be set as day
  */
 const setCookie = (res, { cookieName, accessToken, maxAge }) => {
