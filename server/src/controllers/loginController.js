@@ -1,7 +1,7 @@
 const createError = require("http-errors");
 const User = require("../models/user");
 const { default: mongoose } = require("mongoose");
-const { successResponse } = require("../err/resopnse");
+const { successResponse } = require("../err/response");
 const { createJsonWebToken } = require("../helper/jsonWebToken");
 const { emailWithNodemailer } = require("../services/email");
 const jwt = require("jsonwebtoken");

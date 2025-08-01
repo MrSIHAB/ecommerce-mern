@@ -1,14 +1,17 @@
-//  =======================    npm modules   ======================
 const express = require("express");
 const morgan = require("morgan");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const xxsClean = require("xss-clean");
 
-//  ====================    Importing middlewares   ======================
-const { rateLimiter } = require("./middlewares/rateLimiter");
+const getAllUserRoute = require("./routers/user"); // getting all users
+const seedRoute = require("./routers/seedRouter") || null; // SeedRoute
+const loginRoute = require("./routers/login"); // SignUP, Login, Logout
 
-//  ======================    Configure Module   ======================
+const { rateLimiter } = require("./middlewares/rateLimiter");
+const { errorResponse } = require("./err/response");
+
+// *  ======================    Configure Module   ======================
 const app = express();
 require("dotenv").config();
 
@@ -22,19 +25,15 @@ app.use(bodyParser.urlencoded({ extended: true }));
 //  =====================    Register our Middlewares   ======================
 app.use(rateLimiter);
 
-//  ========================    Importig Routers   ======================
-const getAllUserRoute = require("./routers/user"); // getting all users
-const seedRoute = require("./routers/seedRouter") || null; // SeedRoute
-const loginRoute = require("./routers/login"); // SignUP, Login, Logout
+//  ========================    Importing Routers   ======================
 
 //  ==========================    Register Routers   ======================
 app.get("/", (req, res) => res.send("Welcome to Home")); // Home Route
-app.use("/api/", loginRoute);
+app.use("/api/auth", loginRoute);
 app.use("/api/seed", seedRoute);
 app.use("/api/users", getAllUserRoute);
 
 //  ===========================    Error Handling   ======================
-const { errorResponse } = require("./err/resopnse");
 
 //  ------- client side errors
 app.use((req, res, next) => {

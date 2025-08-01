@@ -6,7 +6,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 
 const { findWithId } = require("../helper/findWithId");
-const { successResponse } = require("../err/resopnse");
+const { successResponse } = require("../err/response");
 const { deleteImage } = require("../helper/deleteImage");
 const { maxImgSize } = require("../config/ppConfig.json");
 const { findAllUser } = require("../services/user");

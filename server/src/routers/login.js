@@ -1,4 +1,11 @@
 const { Router } = require("express");
+const runValidator = require("../validations");
+const upload = require("../middlewares/uploadFile");
+const { isLoggedOut, isLoggedIn } = require("../middlewares/auth");
+const {
+  validateUserRegistration,
+  validateUserLogin,
+} = require("../validations/auth");
 const {
   handlePostRegister,
   handlePostLogin,
@@ -6,12 +13,6 @@ const {
   handleUserActivation,
   handleRefreshToken,
 } = require("../controllers/loginController");
-const upload = require("../middlewares/uploadFile");
-const { validateUserRegistration, validateUserLogin } = require(
-  "../validations/auth",
-);
-const runValidator = require("../validations");
-const { isLoggedOut, isLoggedIn } = require("../middlewares/auth");
 
 const router = Router();
 

@@ -7,7 +7,7 @@ const errorResponse = (
   /**
    * Error handling is very essential to prevent server crashes and security purpose.
    *
-   * we've made this handler function to handle serverside errors.
+   * we've made this handler function to handle server side errors.
    * This function will mainly be used in app.js file.
    */
 
@@ -23,7 +23,7 @@ const successResponse = (
   { statusCode = 200, message = "Success", payload = {} },
 ) => {
   /**
-   * We can use this function to return any succesfull response.
+   * We can use this function to return any successful response.
    * The payload object will hold the response data.
    */
 
