@@ -51,8 +51,9 @@ const getUser = async (req, res, next) => {
       payload,
     });
   } catch (err) {
-    if (err instanceof mongoose.Error)
+    if (err instanceof mongoose.Error) {
       next(createError(404, "User not found."));
+    }
 
     return next(err);
   }
@@ -71,8 +72,9 @@ const getUserById = async (req, res, next) => {
       payload: { user }, // sending data
     });
   } catch (err) {
-    if (err instanceof mongoose.Error.CastError)
+    if (err instanceof mongoose.Error.CastError) {
       throw createError(400, "Invalid ID");
+    }
     return next(err);
   }
 };
@@ -94,10 +96,12 @@ const deleteUser = async (req, res, next) => {
       message: `${user.name} has been deleted successfully.`,
     });
   } catch (err) {
-    if (err instanceof mongoose.Error)
+    if (err instanceof mongoose.Error) {
       throw createError(404, "Could not delete the user.");
-    if (err instanceof mongoose.Error.CastError)
+    }
+    if (err instanceof mongoose.Error.CastError) {
       throw createError(400, "Invalid ID");
+    }
     return next(err);
   }
 };
@@ -112,8 +116,9 @@ const updateUserById = async (req, res, next) => {
 
     if (body.email) throw createError(400, "Email can't be changed.");
     for (key in body) {
-      if (["name", "password", "address", "phone"].includes(key))
+      if (["name", "password", "address", "phone"].includes(key)) {
         user[key] = body[key];
+      }
     }
 
     //  Deleting and updating User image
@@ -136,8 +141,9 @@ const updateUserById = async (req, res, next) => {
       payload: updateUser,
     });
   } catch (error) {
-    if (err instanceof mongoose.Error.CastError)
+    if (err instanceof mongoose.Error.CastError) {
       throw createError(400, "Invalid ID");
+    }
     return next(error);
   }
 };
@@ -158,7 +164,7 @@ const handleManageUserById = async (req, res, next) => {
     let updateResult = await User.findByIdAndUpdate(
       id,
       { isBan: BanOption },
-      updateOptions
+      updateOptions,
     );
     if (!updateResult) throw createError(400, "Process failed.");
 
@@ -169,8 +175,9 @@ const handleManageUserById = async (req, res, next) => {
       } successfully.`,
     });
   } catch (error) {
-    if (err instanceof mongoose.Error.CastError)
+    if (err instanceof mongoose.Error.CastError) {
       throw createError(400, "Invalid ID");
+    }
     return next(error);
   }
 };
@@ -188,15 +195,16 @@ const handleUpdatePassword = async (req, res, next) => {
       throw createError(400, "Wrong email/password!!");
     }
     if (!user) throw createError(404, "user not found");
-    if (newPassword !== confirmPassword)
+    if (newPassword !== confirmPassword) {
       throw createError(406, "Confirm your password correctly");
+    }
 
     //  Hashing newPassword
     let password = await passwordHash(newPassword, salt);
     let updatedUser = await User.findByIdAndUpdate(
       _id,
       { password },
-      { new: true }
+      { new: true },
     ); //update
     if (!updatedUser) throw createError(400, "Proccess faild");
 
@@ -221,7 +229,7 @@ const handleForgetPassword = async (req, res, next) => {
     const resetToken = createJsonWebToken(
       { email, id: user._id, salt: user.salt },
       jwtForgetPassKey,
-      "10m"
+      "10m",
     );
     // ------------------------------------ Preparing Email
     const emailData = {
@@ -290,7 +298,7 @@ const handleResetPassword = async (req, res, next) => {
         _id: deCodedToken.id,
       },
       { password: hashedPassword, salt: newSalt },
-      { new: true }
+      { new: true },
     );
     console.log(user);
 

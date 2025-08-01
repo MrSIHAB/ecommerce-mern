@@ -11,8 +11,9 @@ const { JWT_ACCESS_KEY } = require("./loginController");
 const handleRefreshToken = async (req, res, next) => {
   try {
     const refreshToken = req.cookies.refreshToken;
-    if (!refreshToken)
+    if (!refreshToken) {
       return next(createError(401, "No refresh token provided"));
+    }
 
     // Verify the old refresh token
     const decoded = await jwt.verify(refreshToken, process.env.JWT_REFRESH_KEY);
@@ -36,7 +37,7 @@ const handleRefreshToken = async (req, res, next) => {
     let newRefreshToken = await createJsonWebToken(
       { user },
       JWT_REFRESH_KEY,
-      "7d"
+      "7d",
     );
     res.cookie("refreshToken", newRefreshToken, {
       maxAge: 7 * 24 * 60 * 60 * 1000,

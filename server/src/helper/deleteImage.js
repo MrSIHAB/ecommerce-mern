@@ -1,14 +1,14 @@
 const fs = require("fs").promises;
-const { defaultImgDest } = require('../config/ppConfig.json')
+const { defaultImgDest } = require("../config/ppConfig.json");
 
 const deleteImage = async (imgPath) => {
   try {
-    if(imgPath === defaultImgDest) return;
+    if (imgPath === defaultImgDest) return;
     await fs.access(imgPath);
     await fs.unlink(imgPath);
     return true;
   } catch (error) {
-    throw new Error("Unsuccesfull")
+    throw new Error("Unsuccesfull");
   }
 };
 

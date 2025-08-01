@@ -1,9 +1,9 @@
 const { Schema, model } = require("mongoose");
 const crypto = require("crypto");
-const createError = require('http-errors');
-const {defaultImgDest} = require('../config/ppConfig.json')
+const createError = require("http-errors");
+const { defaultImgDest } = require("../config/ppConfig.json");
 
-const hashPassword = require('../helper/passwordHash')
+const hashPassword = require("../helper/passwordHash");
 
 //    -----------------------------------------------------------------------------  mongodb user schema
 const userSchema = new Schema(
@@ -12,8 +12,8 @@ const userSchema = new Schema(
       type: String,
       required: [true, "Name is required"],
       trim: true,
-      minlength: [2, "Name Lenght can't be less than 2 character"],
-      maxlength: [25, "Name Lenght can't be more than 25 character"],
+      minLength: [2, "Name length can't be less than 2 character"],
+      maxLength: [25, "Name Length can't be more than 25 character"],
     },
     email: {
       type: String,
@@ -21,7 +21,10 @@ const userSchema = new Schema(
       unique: [true, "This email is already used"],
       trim: true,
       lowercase: true,
-      match: [/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g , "Please Enter a valid Email address."]
+      match: [
+        /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g,
+        "Please Enter a valid Email address.",
+      ],
     },
     phone: {
       type: String,
@@ -29,9 +32,9 @@ const userSchema = new Schema(
       unique: true,
       trim: true,
     },
-    address:{
+    address: {
       type: String,
-      required: [true, "Address is required"]
+      required: [true, "Address is required"],
     },
     salt: {
       type: String,
@@ -42,18 +45,18 @@ const userSchema = new Schema(
     },
     image: {
       type: String,
-      default: defaultImgDest
+      default: defaultImgDest,
     },
-    isAdmin:{
+    isAdmin: {
       type: Boolean,
-      default: false
+      default: false,
     },
-    isBan:{
+    isBan: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 /**
  * Why do we make Schemas in NoSQL Database?
@@ -83,14 +86,18 @@ userSchema.pre("save", async function (next) {
 userSchema.static("matchPassword", async function (email, password) {
   let user = await this.findOne({ email });
   if (!user) throw new Error("User not found!!");
-  
+
   let salt = await user.salt;
   let hasedPassword = await user.password;
-  
-  const signinHash = await hashPassword(password, salt)
-  
-  if (signinHash !== hasedPassword) throw createError(403, "Incorrect Password !");
-  if (user.isBan) throw createError(401, "You're baned! Please contact authority.");
+
+  const signinHash = await hashPassword(password, salt);
+
+  if (signinHash !== hasedPassword) {
+    throw createError(403, "Incorrect Password !");
+  }
+  if (user.isBan) {
+    throw createError(401, "You're baned! Please contact authority.");
+  }
 
   user.password = undefined;
   user.salt = undefined;

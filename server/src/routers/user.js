@@ -30,19 +30,19 @@ userRoute.put(
   isAdmin,
   validateReplacePassword,
   runValidator,
-  handleUpdatePassword
+  handleUpdatePassword,
 );
 userRoute.post(
   "/forget-password",
   validateForgetPassword,
   runValidator,
-  handleForgetPassword
+  handleForgetPassword,
 );
 userRoute.put(
   "/reset-password",
   validateResetPassword,
   runValidator,
-  handleResetPassword
+  handleResetPassword,
 );
 
 /**     Admin Only     */
@@ -51,7 +51,7 @@ userRoute.put(
   "/manage-user/:id([0-9a-fA-F]{24})",
   isLoggedIn,
   isAdmin,
-  handleManageUserById
+  handleManageUserById,
 );
 userRoute.get("/:id([0-9a-fA-F]{24})", isLoggedIn, getUserById);
 

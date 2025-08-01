@@ -76,8 +76,9 @@ const handlePostRegister = async (req, res, next) => {
       },
     });
   } catch (error) {
-    if (error instanceof mongoose.Error)
+    if (error instanceof mongoose.Error) {
       next(createError(404, "Incorrect entry! Refresh and try again."));
+    }
 
     next(createError(404, "Could not create an account!"));
   }
@@ -93,14 +94,17 @@ const handleUserActivation = async (req, res, next) => {
       /** Decoding the access token with the enCoding activation key */
       const deCodedAccount = jwt.verify(token, JWT_ACTIVATION_KEY);
       if (!deCodedAccount) throw createError(401, "User not able to varify.");
-      if (await User.exists({ email: deCodedAccount.email }))
+      if (await User.exists({ email: deCodedAccount.email })) {
         throw createError(409, "User Already Exist. SignIN please.");
+      }
       await User.create(deCodedAccount); // saving user
     } catch (error) {
-      if (error.name === "TokenExpiredError")
+      if (error.name === "TokenExpiredError") {
         throw createError(401, "Token Expired");
-      if (error.name === "JsonWebTokenError")
+      }
+      if (error.name === "JsonWebTokenError") {
         throw createError(401, "Invalid Token");
+      }
       throw error;
     }
 
@@ -136,7 +140,7 @@ const handlePostLogin = async (req, res, next) => {
     let refreshToken = await createJsonWebToken(
       { user },
       JWT_REFRESH_KEY,
-      "7d"
+      "7d",
     );
     res.cookie("refreshToken", refreshToken, {
       maxAge: 7 * 24 * 60 * 60 * 1000,
@@ -174,8 +178,9 @@ const handleLogout = (req, res, next) => {
 const handleRefreshToken = async (req, res, next) => {
   try {
     const refreshToken = req.cookies.refreshToken;
-    if (!refreshToken)
+    if (!refreshToken) {
       return next(createError(401, "No refresh token provided"));
+    }
 
     // Verify the old refresh token
     const decoded = await jwt.verify(refreshToken, process.env.JWT_REFRESH_KEY);
@@ -192,7 +197,7 @@ const handleRefreshToken = async (req, res, next) => {
     let newRefreshToken = await createJsonWebToken(
       { user },
       JWT_REFRESH_KEY,
-      "7d"
+      "7d",
     );
     setRefreshToken(res, newRefreshToken);
 

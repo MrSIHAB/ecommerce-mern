@@ -21,9 +21,8 @@ const validateUserRegistration = [
     .withMessage("Password should be at least 6 character long.")
     .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$/)
     .withMessage(
-      "Password must contain UpperCase & LowerCase later, a number and a special character."
-    )
-  ,
+      "Password must contain UpperCase & LowerCase later, a number and a special character.",
+    ),
   body("address")
     .trim()
     .notEmpty()
@@ -37,14 +36,8 @@ const validateUserRegistration = [
     .isMobilePhone()
     .withMessage("Invalid number address"),
   body("image")
-    .optional()
-    // .custom((value, { req }) => {
-    //   if (!req.file || !req.file.buffer) throw new Error("Image required!");
-    //   return true;
-    // })
-  ,
+    .optional(),
 ];
-
 
 //  ===============   Login Validation   ==================
 const validateUserLogin = [
@@ -56,9 +49,8 @@ const validateUserLogin = [
     .withMessage("Invalid E-mail address. Please enter email correctly"),
   body("password")
     .notEmpty()
-    .withMessage("Password is Required. Enter a strong password.")
-]
-
+    .withMessage("Password is Required. Enter a strong password."),
+];
 
 //  ===============   Login Validation   ==================
 const validateReplacePassword = [
@@ -70,41 +62,33 @@ const validateReplacePassword = [
     .withMessage("Password should be at least 6 character long.")
     .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$/)
     .withMessage(
-      "Password must contain UpperCase & LowerCase later, a number and a special character."
-    )
-    ,
+      "Password must contain UpperCase & LowerCase later, a number and a special character.",
+    ),
   body("confirmPassword")
-    .notEmpty().withMessage("Confirm your password for security perpose.")
-]
-
+    .notEmpty().withMessage("Confirm your password for security perpose."),
+];
 
 //  ===============   Login Validation   ==================
 const validateForgetPassword = [
   body("email")
     .notEmpty().withMessage("Email is required to recover password.")
     .isEmail().withMessage("Wrong Email Address"),
-]
-
+];
 
 //  ===============   Login Validation   ==================
 const validateResetPassword = [
   body("token")
     .trim()
-    .notEmpty().withMessage("Token not found")
-  ,
+    .notEmpty().withMessage("Token not found"),
   body("password")
     .notEmpty().withMessage("Pleasr ensure your new password")
     .isLength({ min: 6 })
     .withMessage("Password should be at least 6 character long.")
     .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$/)
     .withMessage(
-      "Password must contain UpperCase & LowerCase later, a number and a special character."
-    )
-  ,
-]
-
-
-
+      "Password must contain UpperCase & LowerCase later, a number and a special character.",
+    ),
+];
 
 module.exports = {
   validateUserRegistration,
